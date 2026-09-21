@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamSwift — High-Speed Media Processing Engine</title>
+    <meta name="description" content="Convert and process your legally owned public media streams at lightning speeds with zero degradation.">
+    
+    <!-- Open Graph / Twitter -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="StreamSwift — Premium Media Engine">
+    <meta property="og:description" content="Next-generation media processing with ultra-fast cloud rendering.">
+    <meta property="twitter:card" content="summary_large_image">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4F46E5', // Primary
+                            700: '#4338ca',
+                        },
+                        cyanBrand: {
+                            400: '#22d3ee',
+                            500: '#06B6D4', // Secondary
+                        },
+                        accentGreen: {
+                            500: '#22C55E', // Accent
+                        },
+                        darkBg: '#090D16',
+                        darkCard: '#111827',
+                        darkBorder: '#1F2937'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Poppins', 'sans-serif']
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'gradient-x': 'gradient-x 8s ease infinite'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-12px)' }
+                        },
+                        'gradient-x': {
+                            '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
+                            '50%': { 'background-size': '200% 200%', 'background-position': 'right center' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome & Phosphor Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Custom Glassmorphism Styles */
+        .glass-panel {
+            background: rgba(17, 24, 39, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .light .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        .glass-card {
+            background: rgba(31, 41, 55, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .light .glass-card {
+            background: rgba(243, 244, 246, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .glow-effect {
+            box-shadow: 0 0 40px -10px rgba(79, 70, 229, 0.35);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 40px -10px rgba(6, 182, 212, 0.35);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090D16;
+        }
+        .light ::-webkit-scrollbar-track {
+            background: #f3f4f6;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 4px;
+        }
+        .light ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4F46E5;
+        }
+    </style>
+</head>
+<body class="bg-darkBg light:bg-slate-50 text-slate-100 light:text-slate-800 font-sans min-h-screen antialiased transition-colors duration-300 selection:bg-brand-600 selection:text-white relative overflow-x-hidden">
+
+    <!-- Legal Compliance Disclaimer Banner -->
+    <div id="compliance-banner" class="bg-gradient-to-r from-brand-700 via-indigo-900 to-slate-900 text-xs py-2 px-4 border-b border-indigo-500/20 text-indigo-100 flex items-center justify-between z-50 relative">
+        <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="bg-brand-500/30 text-cyanBrand-400 border border-cyanBrand-500/30 font-semibold px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider">Legal Notice</span>
+                <span>StreamSwift is intended solely for personal media processing of content you own or hold explicit permissions for.</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <button onclick="toggleModal('compliance-modal')" class="underline hover:text-white transition text-cyanBrand-400 font-medium">Compliance Specs</button>
+                <button onclick="document.getElementById('compliance-banner').remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 w-full backdrop-blur-xl bg-darkBg/80 light:bg-white/80 border-b border-slate-800/80 light:border-slate-200/80 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 via-cyanBrand-500 to-accentGreen-500 p-0.5 flex items-center justify-center shadow-lg shadow-brand-600/30 group-hover:scale-105 transition transform">
+                    <div class="w-full h-full bg-darkBg light:bg-white rounded-[10px] flex items-center justify-center">
+                        <i class="fa-solid fa-bolt text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-cyanBrand-500 text-xl"></i>
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-display font-extrabold text-2xl tracking-tight text-white light:text-slate-900 leading-none">
+                        Stream<span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-cyanBrand-500">Swift</span>
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-400 tracking-wider uppercase">Enterprise Downloader</span>
+                </div>
+            </a>
+
+            <!-- Desktop Nav Links -->
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300 light:text-slate-600">
+                <a href="#downloader" class="hover:text-brand-600 light:hover:text-brand-600 transition">Converter</a>
+                <a href="#features" class="hover:text-brand-600 light:hover:text-brand-600 transition">Features</a>
+                <a href="#how-it-works" class="hover:text-brand-600 light:hover:text-brand-600 transition">How it Works</a>
+                <a href="#faq" class="hover:text-brand-600 light:hover:text-brand-600 transition">FAQ</a>
+                <button onclick="toggleDocsInspector()" class="px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/20 transition flex items-center gap-2 text-xs font-semibold">
+                    <i class="fa-solid fa-code"></i> Developer & Specs Hub
+                </button>
+            </nav>
+
+            <!-- Actions & Theme Toggle -->
+            <div class="flex items-center gap-3">
+                <button id="theme-toggle" class="w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-300 light:text-slate-700 hover:border-brand-600 transition">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
+                </button>
+                
+                <a href="#downloader" class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-cyanBrand-500 text-white font-semibold text-sm shadow-lg shadow-brand-600/25 hover:opacity-95 transition active:scale-95">
+                    <span>Try Now</span>
+                    <i class="fa-solid fa-arrow-right text-xs"></i>
+                </a>
+
+                <!-- Mobile menu toggle -->
+                <button onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-xl glass-panel flex items-center justify-center text-slate-300">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Nav Menu -->
+        <div id="mobile-menu" class="hidden md:hidden px-4 pt-2 pb-6 border-b border-slate-800 bg-darkBg/95 light:bg-white/95">
+            <div class="flex flex-col gap-4 text-sm font-medium pt-2">
+                <a href="#downloader" onclick="toggleMobileMenu()" class="py-2 border-b border-slate-800/50">Converter Engine</a>
+                <a href="#features" onclick="toggleMobileMenu()" class="py-2 border-b border-slate-800/50">Features</a>
+                <a href="#how-it-works" onclick="toggleMobileMenu()" class="py-2 border-b border-slate-800/50">How it Works</a>
+                <a href="#faq" onclick="toggleMobileMenu()" class="py-2 border-b border-slate-800/50">FAQ</a>
+                <button onclick="toggleDocsInspector(); toggleMobileMenu()" class="py-2 text-left text-indigo-400 flex items-center gap-2">
+                    <i class="fa-solid fa-code"></i> Developer Docs & PRD
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO & LIVE DOWNLOAD ENGINE SECTION -->
+    <section id="downloader" class="relative pt-12 pb-24 md:pt-20 md:pb-32 overflow-hidden">
+        <!-- Ambient Glowing Orbs -->
+        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-600/15 blur-[140px] rounded-full pointer-events-none -z-10 animate-pulse-slow"></div>
+        <div class="absolute top-1/3 right-10 w-[400px] h-[400px] bg-cyanBrand-500/10 blur-[120px] rounded-full pointer-events-none -z-10"></div>
+
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+            <!-- Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border border-brand-500/30 text-xs font-semibold text-indigo-300 light:text-brand-600 mb-6 shadow-sm">
+                <span class="w-2 h-2 rounded-full bg-accentGreen-500 animate-ping"></span>
+                <span>v3.4 High-Speed Engine Active</span>
+                <span class="text-slate-600 light:text-slate-300">|</span>
+                <span class="text-slate-400 light:text-slate-600">Zero Logs & Serverless Flow</span>
+            </div>
+
+            <!-- Headline -->
+            <h1 class="font-display text-4xl sm:text-6xl font-extrabold tracking-tight text-white light:text-slate-900 leading-tight mb-6">
+                Next-Gen <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 via-cyanBrand-500 to-accentGreen-500">Media Conversion</span> for Power Users
+            </h1>
+            <p class="text-lg sm:text-xl text-slate-400 light:text-slate-600 max-w-2xl mx-auto mb-10 font-normal">
+                Extract high-fidelity 4K video and lossless audio streams instantly from your authorized source links with zero advertisements or lag.
+            </p>
+
+            <!-- URL Input Container -->
+            <div class="max-w-3xl mx-auto">
+                <div class="p-2 sm:p-3 rounded-2xl glass-panel glow-effect relative transition-all duration-300 focus-within:ring-2 focus-within:ring-brand-600">
+                    <form id="url-form" onsubmit="handleUrlSubmit(event)" class="flex flex-col sm:flex-row items-center gap-2">
+                        <div class="relative w-full flex items-center">
+                            <i class="fa-solid fa-link absolute left-4 text-slate-400 text-lg"></i>
+                            <input 
+                                type="url" 
+                                id="media-url" 
+                                required
+                                placeholder="Paste video or audio URL (e.g. https://www.youtube.com/watch?v=dQw4w9WgXcQ)..." 
+                                class="w-full bg-slate-900/60 light:bg-white text-white light:text-slate-900 placeholder-slate-500 pl-12 pr-10 py-4 rounded-xl outline-none border border-slate-700/50 light:border-slate-300 text-sm sm:text-base font-medium transition"
+                                value="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                            >
+                            <button type="button" onclick="clearOrPasteInput()" class="absolute right-3 text-slate-400 hover:text-white p-1 text-sm" title="Paste / Clear">
+                                <i class="fa-solid fa-paste"></i>
+                            </button>
+                        </div>
+                        <button 
+                            type="submit" 
+                            id="fetch-btn"
+                            class="w-full sm:w-auto px-8 py-4 rounded-xl bg-gradient-to-r from-brand-600 to-cyanBrand-500 text-white font-bold text-base shadow-lg hover:opacity-95 transition flex items-center justify-center gap-2 whitespace-nowrap active:scale-95"
+                        >
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>Start Processing</span>
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Helper Supported Platforms -->
+                <div class="mt-4 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400 light:text-slate-500">
+                    <span class="flex items-center gap-1.5"><i class="fa-brands fa-youtube text-red-500 text-sm"></i> YouTube</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-brands fa-vimeo text-cyan-400 text-sm"></i> Vimeo</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-brands fa-soundcloud text-orange-500 text-sm"></i> SoundCloud</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-brands fa-facebook text-blue-500 text-sm"></i> Facebook</span>
+                    <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-accentGreen-500 text-sm"></i> SSL Encrypted</span>
+                </div>
+            </div>
+
+            <!-- LIVE MEDIA PREVIEW CONTAINER (Dynamically Populated/Simulated) -->
+            <div id="media-preview-card" class="mt-12 hidden transition-all duration-500 text-left">
+                <div class="glass-panel rounded-3xl p-6 sm:p-8 border border-brand-500/30 relative overflow-hidden">
+                    <div class="absolute -top-24 -right-24 w-48 h-48 bg-brand-600/20 rounded-full blur-2xl pointer-events-none"></div>
+
+                    <div class="flex flex-col lg:flex-row gap-8 items-start">
+                        <!-- Media Thumbnail -->
+                        <div class="w-full lg:w-5/12 relative group rounded-2xl overflow-hidden bg-slate-900 border border-slate-800">
+                            <img id="preview-thumb" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" alt="Media Preview" class="w-full h-56 sm:h-64 object-cover group-hover:scale-105 transition duration-500">
+                            <div class="absolute bottom-3 right-3 bg-black/80 text-white text-xs font-mono font-bold px-2.5 py-1 rounded-md backdrop-blur-md">
+                                <span id="preview-duration">03:33</span>
+                            </div>
+                            <div class="absolute top-3 left-3 bg-brand-600/90 text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md backdrop-blur-md">
+                                <span id="preview-quality-tag">4K Ultra HD</span>
+                            </div>
+                        </div>
+
+                        <!-- Details & Options -->
+                        <div class="w-full lg:w-7/12 flex flex-col justify-between h-full">
+                            <div>
+                                <div class="flex items-center gap-2 text-xs font-semibold text-cyanBrand-400 mb-2">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Stream Verified & Ready for Extraction</span>
+                                </div>
+                                <h3 id="preview-title" class="text-xl sm:text-2xl font-bold text-white light:text-slate-900 leading-snug mb-3">
+                                    Rick Astley - Never Gonna Give You Up (Official High Resolution Remaster)
+                                </h3>
+                                <p id="preview-author" class="text-xs text-slate-400 light:text-slate-600 flex items-center gap-2 mb-6">
+                                    <i class="fa-regular fa-user"></i> Rick Astley VEVO <span class="text-slate-600">•</span> 1.4B Views
+                                </p>
+
+                                <!-- Format Selector Tabs -->
+                                <div class="flex border-b border-slate-800 light:border-slate-200 mb-6">
+                                    <button onclick="switchFormatTab('video')" id="tab-video" class="pb-3 px-4 text-sm font-semibold border-b-2 border-brand-600 text-brand-500 flex items-center gap-2">
+                                        <i class="fa-solid fa-video"></i> Video Formats
+                                    </button>
+                                    <button onclick="switchFormatTab('audio')" id="tab-audio" class="pb-3 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                                        <i class="fa-solid fa-music"></i> Audio Only
+                                    </button>
+                                </div>
+
+                                <!-- Quality List Grid -->
+                                <div id="video-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    <label class="flex items-center justify-between p-3 rounded-xl border border-brand-600/50 bg-brand-600/10 cursor-pointer hover:bg-brand-600/20 transition">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" name="format" value="4k" checked class="text-brand-600 focus:ring-0">
+                                            <div>
+                                                <div class="text-sm font-bold text-white light:text-slate-900">2160p (4K UHD)</div>
+                                                <div class="text-[11px] text-slate-400">MP4 • ~340 MB</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs font-bold text-accentGreen-500 bg-accentGreen-500/10 px-2 py-0.5 rounded">60 FPS</span>
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 rounded-xl border border-slate-800 light:border-slate-200 bg-slate-900/40 light:bg-slate-100 cursor-pointer hover:border-brand-600/30 transition">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" name="format" value="1080p" class="text-brand-600 focus:ring-0">
+                                            <div>
+                                                <div class="text-sm font-bold text-white light:text-slate-900">1080p (Full HD)</div>
+                                                <div class="text-[11px] text-slate-400">MP4 • ~95 MB</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-400">Standard</span>
+                                    </label>
+                                </div>
+
+                                <div id="audio-options" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                                    <label class="flex items-center justify-between p-3 rounded-xl border border-brand-600/50 bg-brand-600/10 cursor-pointer hover:bg-brand-600/20 transition">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" name="format" value="mp3-320" class="text-brand-600 focus:ring-0">
+                                            <div>
+                                                <div class="text-sm font-bold text-white light:text-slate-900">MP3 (320 kbps)</div>
+                                                <div class="text-[11px] text-slate-400">High Quality Audio • ~8 MB</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs font-bold text-cyanBrand-400 bg-cyanBrand-500/10 px-2 py-0.5 rounded">HQ</span>
+                                    </label>
+                                    <label class="flex items-center justify-between p-3 rounded-xl border border-slate-800 light:border-slate-200 bg-slate-900/40 light:bg-slate-100 cursor-pointer hover:border-brand-600/30 transition">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" name="format" value="wav" class="text-brand-600 focus:ring-0">
+                                            <div>
+                                                <div class="text-sm font-bold text-white light:text-slate-900">WAV (Uncompressed)</div>
+                                                <div class="text-[11px] text-slate-400">Lossless Audio • ~35 MB</div>
+                                            </div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-slate-400">Studio</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Conversion / Download Trigger -->
+                            <div>
+                                <button onclick="startDownloadSimulation()" id="download-now-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-accentGreen-500 to-cyanBrand-500 text-slate-950 font-extrabold text-base shadow-lg shadow-accentGreen-500/20 hover:opacity-95 transition flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-download"></i>
+                                    <span>Download Selected Stream</span>
+                                </button>
+
+                                <!-- Processing Progress Bar -->
+                                <div id="download-progress-container" class="hidden mt-4">
+                                    <div class="flex items-center justify-between text-xs font-semibold mb-1">
+                                        <span id="progress-status-text" class="text-cyanBrand-400">Rendering high-speed stream...</span>
+                                        <span id="progress-percent" class="text-white">0%</span>
+                                    </div>
+                                    <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                                        <div id="progress-bar" class="h-full bg-gradient-to-r from-brand-600 via-cyanBrand-500 to-accentGreen-500 w-0 transition-all duration-200"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- LIVE STATS SECTION -->
+    <section class="py-12 border-y border-slate-800/80 light:border-slate-200 bg-slate-950/40 light:bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="p-4">
+                    <div class="font-display text-3xl sm:text-4xl font-extrabold text-white light:text-slate-900 tracking-tight mb-1" id="stat-files">14.8M+</div>
+                    <div class="text-xs sm:text-sm font-medium text-slate-400">Streams Converted</div>
+                </div>
+                <div class="p-4">
+                    <div class="font-display text-3xl sm:text-4xl font-extrabold text-cyanBrand-400 tracking-tight mb-1" id="stat-speed">0.4s</div>
+                    <div class="text-xs sm:text-sm font-medium text-slate-400">Avg Parsing Speed</div>
+                </div>
+                <div class="p-4">
+                    <div class="font-display text-3xl sm:text-4xl font-extrabold text-brand-500 tracking-tight mb-1">100%</div>
+                    <div class="text-xs sm:text-sm font-medium text-slate-400">Ad-Free & Clean</div>
+                </div>
+                <div class="p-4">
+                    <div class="font-display text-3xl sm:text-4xl font-extrabold text-accentGreen-500 tracking-tight mb-1">99.9%</div>
+                    <div class="text-xs sm:text-sm font-medium text-slate-400">Uptime SLA</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES HIGHLIGHTS SECTION -->
+    <section id="features" class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-xs font-bold text-brand-500 uppercase tracking-widest mb-3">Engine Highlights</h2>
+                <p class="font-display text-3xl sm:text-4xl font-bold text-white light:text-slate-900">Designed for speed, built for complete safety.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="glass-card p-8 rounded-3xl hover:border-brand-600/40 transition duration-300 relative group">
+                    <div class="w-14 h-14 rounded-2xl bg-brand-600/20 text-brand-500 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-gauge-high"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white light:text-slate-900 mb-3">Ultra-Fast Processing</h3>
+                    <p class="text-slate-400 light:text-slate-600 text-sm leading-relaxed">
+                        Multi-threaded edge servers process high-bitrate video and audio streams without throttling or queue limits.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card p-8 rounded-3xl hover:border-cyanBrand-500/40 transition duration-300 relative group">
+                    <div class="w-14 h-14 rounded-2xl bg-cyanBrand-500/20 text-cyanBrand-400 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white light:text-slate-900 mb-3">Privacy First & No Registration</h3>
+                    <p class="text-slate-400 light:text-slate-600 text-sm leading-relaxed">
+                        We don't log user activity, store video archives, or require personal account creation. Pure cloud processing.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card p-8 rounded-3xl hover:border-accentGreen-500/40 transition duration-300 relative group">
+                    <div class="w-14 h-14 rounded-2xl bg-accentGreen-500/20 text-accentGreen-500 flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition">
+                        <i class="fa-solid fa-compact-disc"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white light:text-slate-900 mb-3">Uncompressed Lossless Audio</h3>
+                    <p class="text-slate-400 light:text-slate-600 text-sm leading-relaxed">
+                        Extract original master audio tracks up to 320kbps MP3 or studio-grade WAV files directly from source media.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS SECTION -->
+    <section id="how-it-works" class="py-20 bg-slate-950/60 light:bg-slate-100/60 border-y border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-xs font-bold text-cyanBrand-400 uppercase tracking-widest mb-3">3-Step Process</h2>
+                <p class="font-display text-3xl font-bold text-white light:text-slate-900">How StreamSwift Works</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                <!-- Step 1 -->
+                <div class="glass-panel p-8 rounded-2xl relative text-center">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-brand-600 to-cyanBrand-500 text-white font-extrabold flex items-center justify-center mx-auto mb-6 shadow-lg">1</div>
+                    <h4 class="text-lg font-bold text-white light:text-slate-900 mb-2">Paste Media Link</h4>
+                    <p class="text-xs text-slate-400 light:text-slate-600">Copy the URL from YouTube, Vimeo, or audio platforms and insert it in the conversion engine.</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="glass-panel p-8 rounded-2xl relative text-center">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-cyanBrand-500 to-accentGreen-500 text-white font-extrabold flex items-center justify-center mx-auto mb-6 shadow-lg">2</div>
+                    <h4 class="text-lg font-bold text-white light:text-slate-900 mb-2">Select Format & Quality</h4>
+                    <p class="text-xs text-slate-400 light:text-slate-600">Choose between 4K/1080p MP4 video or pristine 320kbps MP3 audio formats.</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="glass-panel p-8 rounded-2xl relative text-center">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-r from-accentGreen-500 to-brand-600 text-white font-extrabold flex items-center justify-center mx-auto mb-6 shadow-lg">3</div>
+                    <h4 class="text-lg font-bold text-white light:text-slate-900 mb-2">Direct Cloud Download</h4>
+                    <p class="text-xs text-slate-400 light:text-slate-600">Click download to fetch the processed file directly to your local device at maximum speed.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPARISON TABLE SECTION -->
+    <section class="py-24">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-xs font-bold text-brand-500 uppercase tracking-widest mb-3">Superior Architecture</h2>
+                <p class="font-display text-3xl font-bold text-white light:text-slate-900">Why Choose StreamSwift over Generic Tools</p>
+            </div>
+
+            <div class="glass-panel rounded-3xl overflow-hidden border border-slate-800">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-900/80 light:bg-slate-200/80 text-xs text-slate-400 uppercase">
+                            <tr>
+                                <th class="p-5">Features & Capabilities</th>
+                                <th class="p-5 text-brand-400 font-bold bg-brand-600/10">StreamSwift</th>
+                                <th class="p-5">Generic Converters (Y2Mate, etc.)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800/60 light:divide-slate-200">
+                            <tr>
+                                <td class="p-5 font-medium text-white light:text-slate-800">Ad Experience & Safety</td>
+                                <td class="p-5 bg-brand-600/10 text-accentGreen-500 font-bold"><i class="fa-solid fa-circle-check mr-2"></i> 100% Clean / Zero Popups</td>
+                                <td class="p-5 text-red-400"><i class="fa-solid fa-circle-xmark mr-2"></i> Heavy Popups & Redirects</td>
+                            </tr>
+                            <tr>
+                                <td class="p-5 font-medium text-white light:text-slate-800">4K & 60FPS Support</td>
+                                <td class="p-5 bg-brand-600/10 text-accentGreen-500 font-bold"><i class="fa-solid fa-circle-check mr-2"></i> Native Full Resolution</td>
+                                <td class="p-5 text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Often capped at 720p/1080p</td>
+                            </tr>
+                            <tr>
+                                <td class="p-5 font-medium text-white light:text-slate-800">Legal & Fair Use Compliance</td>
+                                <td class="p-5 bg-brand-600/10 text-accentGreen-500 font-bold"><i class="fa-solid fa-circle-check mr-2"></i> Clear Guidelines & Disclosures</td>
+                                <td class="p-5 text-red-400"><i class="fa-solid fa-circle-xmark mr-2"></i> No Legal Framework</td>
+                            </tr>
+                            <tr>
+                                <td class="p-5 font-medium text-white light:text-slate-800">Processing Speed</td>
+                                <td class="p-5 bg-brand-600/10 text-accentGreen-500 font-bold"><i class="fa-solid fa-circle-check mr-2"></i> High-Bandwidth Cloud Edge</td>
+                                <td class="p-5 text-amber-400"><i class="fa-solid fa-triangle-exclamation mr-2"></i> Throttled Bandwidth</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ ACCORDION SECTION -->
+    <section id="faq" class="py-20 bg-slate-950/40 light:bg-slate-100/50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-xs font-bold text-brand-500 uppercase tracking-widest mb-3">Got Questions?</h2>
+                <p class="font-display text-3xl font-bold text-white light:text-slate-900">Frequently Asked Questions</p>
+            </div>
+
+            <div class="space-y-4">
+                <!-- FAQ Item 1 -->
+                <div class="glass-panel rounded-2xl overflow-hidden">
+                    <button onclick="toggleFaq(1)" class="w-full p-6 text-left flex justify-between items-center text-white light:text-slate-900 font-semibold text-base">
+                        <span>Is it legal to use StreamSwift for downloading online media?</span>
+                        <i id="faq-icon-1" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                    </button>
+                    <div id="faq-ans-1" class="hidden px-6 pb-6 text-sm text-slate-400 light:text-slate-600 leading-relaxed">
+                        StreamSwift is designed for converting and downloading media that you legally own, have explicit written permission to download, or content published under Creative Commons and public domain licenses. Users must strictly adhere to third-party copyright laws.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 2 -->
+                <div class="glass-panel rounded-2xl overflow-hidden">
+                    <button onclick="toggleFaq(2)" class="w-full p-6 text-left flex justify-between items-center text-white light:text-slate-900 font-semibold text-base">
+                        <span>Do I need to register an account or install software?</span>
+                        <i id="faq-icon-2" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                    </button>
+                    <div id="faq-ans-2" class="hidden px-6 pb-6 text-sm text-slate-400 light:text-slate-600 leading-relaxed">
+                        No installation or user registration is required. StreamSwift operates entirely within your web browser using lightweight client-side scripts and serverless edge functions.
+                    </div>
+                </div>
+
+                <!-- FAQ Item 3 -->
+                <div class="glass-panel rounded-2xl overflow-hidden">
+                    <button onclick="toggleFaq(3)" class="w-full p-6 text-left flex justify-between items-center text-white light:text-slate-900 font-semibold text-base">
+                        <span>What resolution and file formats are supported?</span>
+                        <i id="faq-icon-3" class="fa-solid fa-chevron-down text-xs transition-transform duration-300"></i>
+                    </button>
+                    <div id="faq-ans-3" class="hidden px-6 pb-6 text-sm text-slate-400 light:text-slate-600 leading-relaxed">
+                        We support video resolutions from 360p up to pristine 4K UHD (2160p) in MP4/WEBM formats, as well as audio extraction in 320kbps MP3, AAC, and uncompressed WAV formats.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-darkBg light:bg-white border-t border-slate-800 light:border-slate-200 py-12 text-xs text-slate-400 light:text-slate-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-7 h-7 rounded-lg bg-brand-600 flex items-center justify-center text-white text-xs font-bold">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <span class="font-display font-extrabold text-lg text-white light:text-slate-900 tracking-tight">StreamSwift</span>
+                    </div>
+                    <p class="leading-relaxed mb-4">High-performance media conversion platform engineered for legal public media processing.</p>
+                    <p>© 2026 StreamSwift. Hosted on GitHub Pages.</p>
+                </div>
+
+                <div>
+                    <h5 class="font-bold text-white light:text-slate-900 uppercase tracking-wider mb-4">Platform</h5>
+                    <ul class="space-y-2">
+                        <li><a href="#downloader" class="hover:text-white transition">Media Converter</a></li>
+                        <li><a href="#features" class="hover:text-white transition">System Features</a></li>
+                        <li><a href="#how-it-works" class="hover:text-white transition">Workflow</a></li>
+                        <li><button onclick="toggleDocsInspector()" class="hover:text-white transition text-left">Developer Specs</button></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-bold text-white light:text-slate-900 uppercase tracking-wider mb-4">Legal & Ethics</h5>
+                    <ul class="space-y-2">
+                        <li><a href="#" onclick="toggleModal('compliance-modal'); return false;" class="hover:text-white transition">Terms of Service</a></li>
+                        <li><a href="#" onclick="toggleModal('compliance-modal'); return false;" class="hover:text-white transition">Privacy Policy</a></li>
+                        <li><a href="#" onclick="toggleModal('compliance-modal'); return false;" class="hover:text-white transition">DMCA Takedown Policy</a></li>
+                        <li><a href="#" onclick="toggleModal('compliance-modal'); return false;" class="hover:text-white transition">Copyright Guidelines</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h5 class="font-bold text-white light:text-slate-900 uppercase tracking-wider mb-4">Compliance Status</h5>
+                    <div class="p-4 rounded-xl glass-panel border border-accentGreen-500/20 text-slate-300">
+                        <div class="flex items-center gap-2 text-accentGreen-500 font-bold mb-1">
+                            <i class="fa-solid fa-shield-check"></i> DMCA Compliant
+                        </div>
+                        <p class="text-[11px] leading-relaxed">
+                            StreamSwift respects intellectual property rights. Respect artist copyrights when using this application.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-slate-800/80 light:border-slate-200 text-center">
+                <p class="text-slate-500">
+                    Disclaimer: StreamSwift is an independent utility tool. It is not affiliated, authorized, or endorsed by YouTube, Google LLC, Vimeo, or any third-party platform.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- DEVELOPER & PRD SPECS HUB MODAL / DRAWER -->
+    <div id="docs-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div class="bg-darkCard light:bg-white border border-slate-800 light:border-slate-200 rounded-3xl w-full max-w-5xl h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+            
+            <!-- Modal Header -->
+            <div class="p-6 border-b border-slate-800 light:border-slate-200 flex items-center justify-between bg-slate-900/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-brand-600/20 text-brand-500 flex items-center justify-center font-bold">
+                        <i class="fa-solid fa-code"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white light:text-slate-900">StreamSwift Technical Architecture & Specs Hub</h3>
+                        <p class="text-xs text-slate-400">Live inspection tool for UX, PRD, SEO, and Brand System</p>
+                    </div>
+                </div>
+                <button onclick="toggleDocsInspector()" class="w-9 h-9 rounded-xl glass-panel flex items-center justify-center text-slate-400 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Modal Nav Tabs -->
+            <div class="flex border-b border-slate-800 light:border-slate-200 bg-slate-950/40 px-6 overflow-x-auto">
+                <button onclick="switchDocsTab('prd')" id="doc-tab-prd" class="py-3 px-4 text-xs font-bold border-b-2 border-brand-600 text-brand-500 whitespace-nowrap">Product Requirements (PRD)</button>
+                <button onclick="switchDocsTab('brand')" id="doc-tab-brand" class="py-3 px-4 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">Brand & Tokens</button>
+                <button onclick="switchDocsTab('seo')" id="doc-tab-seo" class="py-3 px-4 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">SEO & Meta Tags</button>
+                <button onclick="switchDocsTab('folder')" id="doc-tab-folder" class="py-3 px-4 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white whitespace-nowrap">GitHub Structure</button>
+            </div>
+
+            <!-- Modal Body Content -->
+            <div class="p-6 overflow-y-auto flex-1 text-sm text-slate-300 light:text-slate-700 space-y-6">
+                
+                <!-- Tab: PRD -->
+                <div id="doc-sec-prd" class="space-y-4">
+                    <h4 class="text-base font-bold text-white light:text-slate-900">1. Product Requirements Document (PRD) Overview</h4>
+                    <p class="text-xs leading-relaxed text-slate-400">
+                        StreamSwift is engineered to displace ad-saturated, suspicious converter websites by delivering an elegant SaaS experience.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-4 rounded-xl glass-panel border border-slate-800">
+                            <h5 class="font-bold text-white mb-2 text-xs">Primary User Goals</h5>
+                            <ul class="list-disc list-inside text-xs space-y-1 text-slate-400">
+                                <li>Convert legally owned video/audio streams quickly.</li>
+                                <li>Select exact bitrate/resolutions without deceptive download buttons.</li>
+                                <li>Zero exposure to malware, popups, or phishing links.</li>
+                            </ul>
+                        </div>
+                        <div class="p-4 rounded-xl glass-panel border border-slate-800">
+                            <h5 class="font-bold text-white mb-2 text-xs">Technical Guardrails</h5>
+                            <ul class="list-disc list-inside text-xs space-y-1 text-slate-400">
+                                <li>Client-side stream resolution parsing.</li>
+                                <li>Full responsive layout across Mobile, Tablet, and Desktop.</li>
+                                <li>Strict legal fair-use disclaimers to prevent misuse.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Brand -->
+                <div id="doc-sec-brand" class="hidden space-y-4">
+                    <h4 class="text-base font-bold text-white light:text-slate-900">2. Brand Identity & Design System Tokens</h4>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="p-3 rounded-xl bg-[#4F46E5] text-white text-xs font-mono font-bold">
+                            Primary: #4F46E5
+                        </div>
+                        <div class="p-3 rounded-xl bg-[#06B6D4] text-slate-950 text-xs font-mono font-bold">
+                            Secondary: #06B6D4
+                        </div>
+                        <div class="p-3 rounded-xl bg-[#22C55E] text-slate-950 text-xs font-mono font-bold">
+                            Accent: #22C55E
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400">
+                        <strong>Typography:</strong> Inter (Body, Inputs, Labels) & Poppins (Headings, Display Titles).<br>
+                        <strong>Visual Style:</strong> Dark Slate Glassmorphism with modern CSS backdrops and subtle glowing ambient lights.
+                    </p>
+                </div>
+
+                <!-- Tab: SEO -->
+                <div id="doc-sec-seo" class="hidden space-y-4">
+                    <h4 class="text-base font-bold text-white light:text-slate-900">3. SEO & Structured Data Strategy</h4>
+                    <pre class="bg-slate-900 p-4 rounded-xl font-mono text-xs text-cyanBrand-400 overflow-x-auto border border-slate-800">
+&lt;!-- Structured Data for Software Application --&gt;
+&lt;script type="application/ld+json"&gt;
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "StreamSwift",
+  "operatingSystem": "All Web Browsers",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0.00",
+    "priceCurrency": "USD"
+  }
+}
+&lt;/script&gt;</pre>
+                </div>
+
+                <!-- Tab: Folder -->
+                <div id="doc-sec-folder" class="hidden space-y-4">
+                    <h4 class="text-base font-bold text-white light:text-slate-900">4. GitHub Pages Deployment Folder Architecture</h4>
+                    <pre class="bg-slate-900 p-4 rounded-xl font-mono text-xs text-slate-300 border border-slate-800">
+/
+├── index.html            # Main Single-Page Application & Layout
+├── README.md             # Project Documentation & Usage Rules
+├── LICENSE               # MIT / Fair-Use Compliance License
+└── assets/
+    ├── favicon.ico       # Brand Favicon
+    └── og-preview.png    # Open Graph Social Preview Image</pre>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- COMPLIANCE SPECS MODAL -->
+    <div id="compliance-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-darkCard light:bg-white border border-slate-800 light:border-slate-200 rounded-3xl w-full max-w-2xl p-6 sm:p-8 space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h3 class="text-lg font-bold text-white light:text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-scale-balanced text-brand-500"></i> Legal & Compliance Framework
+                </h3>
+                <button onclick="toggleModal('compliance-modal')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-3 text-xs text-slate-300 light:text-slate-600 leading-relaxed">
+                <p><strong>1. Acceptable Use:</strong> StreamSwift strictly facilitates the conversion and download of media content that is owned by the user, explicitly licensed under Creative Commons, or in the public domain.</p>
+                <p><strong>2. Third-Party Rights:</strong> Downloading copyrighted material without express consent from the copyright holder violates platform terms of service and federal copyright statutes.</p>
+                <p><strong>3. Zero Hosting Policy:</strong> StreamSwift does not store, archive, or host any audio or video files on its servers. All processing is transient and ephemeral.</p>
+            </div>
+
+            <button onclick="toggleModal('compliance-modal')" class="w-full py-3 rounded-xl bg-brand-600 text-white font-bold text-sm hover:bg-brand-700 transition">
+                I Understand & Agree
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APP ARCHITECTURE -->
+    <script>
+        
+        // Dark / Light Theme Toggle Engine
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        themeToggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            document.documentElement.classList.toggle('light');
+        });
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Generic Modal Toggle
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.toggle('hidden');
+        }
+
+        // Developer Docs Hub Modal Toggle
+        function toggleDocsInspector() {
+            const modal = document.getElementById('docs-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        // Docs Tab Switcher
+        function switchDocsTab(tab) {
+            ['prd', 'brand', 'seo', 'folder'].forEach(t => {
+                document.getElementById(`doc-tab-${t}`).classList.remove('border-brand-600', 'text-brand-500');
+                document.getElementById(`doc-tab-${t}`).classList.add('border-transparent', 'text-slate-400');
+                document.getElementById(`doc-sec-${t}`).classList.add('hidden');
+            });
+
+            document.getElementById(`doc-tab-${tab}`).classList.add('border-brand-600', 'text-brand-500');
+            document.getElementById(`doc-tab-${tab}`).classList.remove('border-transparent', 'text-slate-400');
+            document.getElementById(`doc-sec-${tab}`).classList.remove('hidden');
+        }
+
+        // Format Tab Switcher (Video vs Audio)
+        function switchFormatTab(tab) {
+            const vTab = document.getElementById('tab-video');
+            const aTab = document.getElementById('tab-audio');
+            const vOpt = document.getElementById('video-options');
+            const aOpt = document.getElementById('audio-options');
+
+            if (tab === 'video') {
+                vTab.className = 'pb-3 px-4 text-sm font-semibold border-b-2 border-brand-600 text-brand-500 flex items-center gap-2';
+                aTab.className = 'pb-3 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2';
+                vOpt.classList.remove('hidden');
+                aOpt.classList.add('hidden');
+            } else {
+                aTab.className = 'pb-3 px-4 text-sm font-semibold border-b-2 border-brand-600 text-brand-500 flex items-center gap-2';
+                vTab.className = 'pb-3 px-4 text-sm font-semibold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2';
+                aOpt.classList.remove('hidden');
+                vOpt.classList.add('hidden');
+            }
+        }
+
+        // FAQ Accordion Toggle
+        function toggleFaq(id) {
+            const ans = document.getElementById(`faq-ans-${id}`);
+            const icon = document.getElementById(`faq-icon-${id}`);
+            
+            if (ans.classList.contains('hidden')) {
+                ans.classList.remove('hidden');
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                ans.classList.add('hidden');
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        // Quick Input Paste/Clear
+        function clearOrPasteInput() {
+            const input = document.getElementById('media-url');
+            if (input.value) {
+                input.value = '';
+            } else {
+                input.value = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+            }
+        }
+
+        
+        // Media URL Submit Handler (Simulating Stream Extraction)
+        function handleUrlSubmit(e) {
+            e.preventDefault();
+            const btn = document.getElementById('fetch-btn');
+            const previewCard = document.getElementById('media-preview-card');
+            
+            // UI Loading State
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Parsing Stream...`;
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-bolt"></i> Start Processing`;
+                
+                // Show Media Preview
+                previewCard.classList.remove('hidden');
+                previewCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 800);
+        }
+
+        // Download Simulation Progress Bar Logic
+        function startDownloadSimulation() {
+            const btn = document.getElementById('download-now-btn');
+            const progressContainer = document.getElementById('download-progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            const progressPercent = document.getElementById('progress-percent');
+            const progressStatus = document.getElementById('progress-status-text');
+
+            btn.classList.add('hidden');
+            progressContainer.classList.remove('hidden');
+
+            let percent = 0;
+            const interval = setInterval(() => {
+                percent += Math.floor(Math.random() * 15) + 5;
+                if (percent >= 100) {
+                    percent = 100;
+                    clearInterval(interval);
+                    
+                    progressStatus.innerText = 'Conversion Complete! Initiating Download...';
+                    progressStatus.className = 'text-accentGreen-500 font-bold';
+                    
+                    setTimeout(() => {
+                        alert('Demo mode: File conversion simulation complete. High-speed file packet generated successfully!');
+                        btn.classList.remove('hidden');
+                        progressContainer.classList.add('hidden');
+                        progressBar.style.width = '0%';
+                        progressPercent.innerText = '0%';
+                        progressStatus.innerText = 'Rendering high-speed stream...';
+                        progressStatus.className = 'text-cyanBrand-400';
+                    }, 800);
+                }
+
+                progressBar.style.width = `${percent}%`;
+                progressPercent.innerText = `${percent}%`;
+            }, 250);
+        }
+    </script>
+</body>
+</html>
